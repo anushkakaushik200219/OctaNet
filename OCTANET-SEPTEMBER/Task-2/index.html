@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.1/css/all.min.css">
+    <style>
+        
+            body {
+              background-image: url('a.jpg');
+              background-size: cover;
+              background-repeat: no-repeat;
+              /* Additional styles can be added here */
+            }
+        
+        .todo-container {
+            max-width: 800px; /* Expanded width */
+            margin: 0 auto;
+            background: linear-gradient(to bottom, #00C9FF, #92FE9D); /* Gradient background */
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+        }
+        .todo-list {
+            list-style: none;
+            padding: 0;
+        }
+        .todo-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px 0;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .delete-button {
+            background-color: #f44336;
+            border: none;
+            color: white;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        .delete-button:hover {
+            background-color: #d32f2f;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid todo-container">
+        <h2 class="mt-4 text-center">To-Do List</h2>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="input-group mb-3">
+                    <input type="text" id="taskInput" class="form-control" placeholder="Add a new task" aria-label="Add a new task" aria-describedby="add-button">
+                    <input type="time" id="taskTime" class="form-control" step="300" aria-label="Task time">
+                    <div class="input-group-append">
+                        <button class="btn btn-primary" type="button" id="addButton"><i class="fas fa-plus"></i> Add</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 text-right">
+                <button class="btn btn-secondary" type="button" id="sortButton"><i class="fas fa-sort-numeric-up"></i> Sort by Time</button>
+            </div>
+        </div>
+        <ul class="todo-list" id="taskList">
+            <!-- Tasks will be dynamically added here -->
+        </ul>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.1/js/all.min.js"></script>
+    <script>
+        // JavaScript to add and remove tasks
+        document.addEventListener("DOMContentLoaded", function () {
+            const taskInput = document.getElementById("taskInput");
+            const taskTime = document.getElementById("taskTime");
+            const addButton = document.getElementById("addButton");
+            const sortButton = document.getElementById("sortButton");
+            const taskList = document.getElementById("taskList");
+
+            addButton.addEventListener("click", function () {
+                const taskText = taskInput.value.trim();
+                const taskTiming = taskTime.value;
+                if (taskText !== "") {
+                    const taskItem = document.createElement("li");
+                    taskItem.className = "todo-item";
+                    taskItem.innerHTML = `
+                        <div style="flex: 1;">
+                            <span class="task-title">${taskText}</span>
+                            <span class="ml-2 task-timing">${taskTiming}</span>
+                        </div>
+                        <button class="btn btn-danger delete-button"><i class="fas fa-trash-alt"></i></button>
+                    `;
+                    taskList.appendChild(taskItem);
+
+                    // Clear input fields
+                    taskInput.value = "";
+                    taskTime.value = "";
+
+                    // Add event listener to delete button
+                    const deleteButton = taskItem.querySelector(".delete-button");
+                    deleteButton.addEventListener("click", function () {
+                        taskItem.remove();
+                    });
+
+                    // Check if the task has a due time
+                    if (taskTiming) {
+                        const currentTime = new Date();
+                        const [hours, minutes] = taskTiming.split(":");
+                        currentTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+
+                        if (currentTime > new Date()) {
+                            const timeDifference = currentTime - new Date();
+                            setTimeout(function () {
+                                // Show an alert when the task time is reached
+                                alert(`Time to complete task: ${taskText}`);
+                            }, timeDifference);
+                        }
+                    }
+                }
+            });
+
+            // Allow adding tasks by pressing Enter key
+            taskInput.addEventListener("keypress", function (event) {
+                if (event.key === "Enter") {
+                    addButton.click();
+                }
+            });
+
+            // Sort the to-do list based on timings in ascending order
+            sortButton.addEventListener("click", function () {
+                const items = Array.from(taskList.querySelectorAll(".todo-item"));
+                const sortedItems = items.sort((a, b) => {
+                    const timeA = a.querySelector(".task-timing").textContent;
+                    const timeB = b.querySelector(".task-timing").textContent;
+                    return timeA.localeCompare(timeB);
+                });
+
+                // Clear the current list and append the sorted items
+                taskList.innerHTML = "";
+                sortedItems.forEach(item => {
+                    taskList.appendChild(item);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
